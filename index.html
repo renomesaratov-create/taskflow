@@ -1,0 +1,988 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- SEO -->
+  <title>TaskFlow — умное приложение для планирования задач</title>
+  <meta name="description" content="TaskFlow — умное приложение для планирования задач: план дня по приоритетам, kanban-доски, календарь и AI-ассистент в одном окне. 14 дней бесплатно.">
+  <link rel="canonical" href="https://taskflow.ru/">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://taskflow.ru/">
+  <meta property="og:title" content="TaskFlow — умное приложение для планирования задач">
+  <meta property="og:description" content="План дня по приоритетам, kanban, календарь и AI-ассистент в одном окне. Хаос заканчивается здесь. 14 дней Pro — бесплатно, без карты.">
+  <meta property="og:image" content="https://taskflow.ru/assets/og-cover.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="TaskFlow">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TaskFlow — умное приложение для планирования задач">
+  <meta name="twitter:description" content="План дня по приоритетам, kanban, календарь и AI-ассистент в одном окне. 14 дней Pro — бесплатно.">
+  <meta name="twitter:image" content="https://taskflow.ru/assets/og-cover.png">
+  <!-- Favicon (inline SVG, без запроса к серверу) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234F46E5'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <!-- Schema.org: приложение + рейтинг (rich snippets в поиске) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "TaskFlow",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web, iOS, Android, Windows, macOS",
+    "url": "https://taskflow.ru/",
+    "offers": [
+      { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "RUB" },
+      { "@type": "Offer", "name": "Pro", "price": "499", "priceCurrency": "RUB" },
+      { "@type": "Offer", "name": "Team", "price": "399", "priceCurrency": "RUB" }
+    ],
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "2300" }
+  }
+  </script>
+  <!-- Yandex.Metrika: вставить счётчик и настроить цели:
+       1) registration_click (клик по CTA «Попробовать бесплатно»)
+       2) lead_form_submit (отправка формы захвата)
+       3) pricing_click (клик по CTA тарифа)
+       4) demo_request (заявка на демо Team) -->
+  <style>
+    /* ============ БАЗА / ДИЗАЙН-СИСТЕМА ============ */
+    :root{
+      --indigo:#4F46E5;          /* акцент, контраст с белым 6.3:1 */
+      --indigo-hover:#4338CA;
+      --indigo-deep:#3730A3;
+      --indigo-soft:#EEF2FF;
+      --ink:#111827;             /* заголовки, 17:1 на белом */
+      --body:#374151;            /* основной текст, 10:1 */
+      --muted:#4B5563;           /* вторичный текст, 7.5:1 */
+      --faint:#6B7280;           /* только крупный текст/подписи, 4.8:1 */
+      --bg:#FFFFFF;
+      --bg-soft:#F9FAFB;
+      --line:#E5E7EB;
+      --green:#047857;
+      --radius:16px;
+      --shadow-sm:0 1px 2px rgba(17,24,39,.06),0 4px 12px rgba(17,24,39,.06);
+      --shadow-md:0 8px 24px rgba(79,70,229,.16),0 2px 6px rgba(17,24,39,.08);
+      --shadow-lg:0 24px 60px rgba(79,70,229,.18),0 4px 12px rgba(17,24,39,.08);
+      --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter",Roboto,"Helvetica Neue",Arial,sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;scroll-padding-top:84px}
+    body{font-family:var(--font);color:var(--body);background:var(--bg);font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+    img{max-width:100%;display:block}
+    a{color:var(--indigo-deep)}
+    h1,h2,h3{color:var(--ink);line-height:1.15;letter-spacing:-.02em;font-weight:800}
+    h1{font-size:clamp(34px,5.4vw,60px)}
+    h2{font-size:clamp(28px,3.8vw,42px)}
+    h3{font-size:20px;font-weight:700;letter-spacing:-.01em}
+    .container{width:min(1160px,100% - 48px);margin-inline:auto}
+    section{padding:96px 0}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--indigo-deep);background:var(--indigo-soft);border:1px solid #E0E7FF;border-radius:999px;padding:6px 14px;margin-bottom:18px}
+    .lead{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:640px}
+    .section-head{max-width:760px;margin-bottom:56px}
+    .section-head .lead{margin-top:16px}
+    .center{text-align:center}
+    .center .lead{margin-inline:auto}
+
+    /* ============ КНОПКИ ============ */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font:inherit;font-weight:700;border:0;cursor:pointer;text-decoration:none;border-radius:14px;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease;white-space:nowrap}
+    .btn:focus-visible{outline:3px solid #A5B4FC;outline-offset:2px}
+    .btn-primary{background:var(--indigo);color:#fff;box-shadow:var(--shadow-md)}
+    .btn-primary:hover{background:var(--indigo-hover);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-ghost{background:#fff;color:var(--indigo-deep);border:1.5px solid #C7D2FE;box-shadow:var(--shadow-sm)}
+    .btn-ghost:hover{border-color:var(--indigo);background:var(--indigo-soft);transform:translateY(-2px)}
+    .btn-lg{padding:18px 32px;font-size:18px}
+    .btn-md{padding:13px 24px;font-size:16px}
+    .btn-block{width:100%}
+    .link-arrow{font-weight:700;text-decoration:none;color:var(--indigo-deep);display:inline-flex;align-items:center;gap:6px}
+    .link-arrow:hover{color:var(--indigo)}
+    .link-arrow svg{transition:transform .18s}
+    .link-arrow:hover svg{transform:translateX(4px)}
+
+    /* ============ STICKY-НАВИГАЦИЯ ============ */
+    .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color .25s,box-shadow .25s}
+    .nav.scrolled{border-bottom-color:var(--line);box-shadow:0 4px 20px rgba(17,24,39,.06)}
+    .nav-inner{display:flex;align-items:center;gap:28px;height:72px}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:800;font-size:21px;letter-spacing:-.02em}
+    .nav-links{display:flex;gap:26px;margin-left:auto;list-style:none}
+    .nav-links a{text-decoration:none;color:var(--muted);font-weight:600;font-size:15.5px;transition:color .15s}
+    .nav-links a:hover{color:var(--indigo-deep)}
+    .nav-cta{display:flex;align-items:center;gap:14px}
+    .nav-login{font-size:15.5px;font-weight:600;text-decoration:none;color:var(--muted)}
+    .nav-login:hover{color:var(--indigo-deep)}
+    .burger{display:none;margin-left:auto;background:none;border:0;cursor:pointer;padding:8px}
+    .burger span{display:block;width:22px;height:2px;background:var(--ink);margin:5px 0;border-radius:2px;transition:transform .2s,opacity .2s}
+    .mobile-menu{display:none;border-top:1px solid var(--line);background:#fff;padding:16px 0 24px}
+    .mobile-menu a{display:block;padding:12px 0;text-decoration:none;color:var(--ink);font-weight:600}
+    .mobile-menu.open{display:block}
+
+    /* ============ 1. HERO (в Tilda: Zero Block) ============ */
+    .hero{padding:72px 0 88px;background:
+      radial-gradient(1000px 500px at 85% -10%, #EEF2FF 0%, rgba(238,242,255,0) 60%),
+      radial-gradient(800px 400px at -10% 20%, #F5F3FF 0%, rgba(245,243,255,0) 55%), #fff}
+    .hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:56px;align-items:center}
+    .hero-social{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+    .avatars{display:flex}
+    .avatars svg{width:38px;height:38px;border-radius:50%;border:2.5px solid #fff;margin-left:-10px}
+    .avatars svg:first-child{margin-left:0}
+    .hero-social p{font-size:14.5px;font-weight:600;color:var(--muted)}
+    .hero-social strong{color:var(--ink)}
+    .hero h1 span{color:var(--indigo)}
+    .hero .lead{margin:22px 0 32px}
+    .hero-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+    .hero-note{margin-top:14px;font-size:14px;color:var(--faint);font-weight:600}
+    .hero-note b{color:var(--green)}
+    .hero-rating{display:flex;align-items:center;gap:10px;margin-top:26px;font-size:14.5px;color:var(--muted);font-weight:600}
+    .stars{display:inline-flex;gap:2px}
+    .hero-visual{position:relative}
+    .hero-visual img{width:100%;border-radius:20px;filter:drop-shadow(0 30px 60px rgba(79,70,229,.18))}
+    .float-card{position:absolute;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-md);padding:12px 16px;display:flex;gap:10px;align-items:center;font-size:14px;font-weight:600;color:var(--ink);animation:float 5s ease-in-out infinite}
+    .float-card .ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:none}
+    .float-card small{display:block;font-weight:500;color:var(--faint);font-size:12.5px}
+    .fc-1{top:8%;left:-6%}
+    .fc-2{bottom:12%;right:-4%;animation-delay:2.5s}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .hero-integrations{margin-top:64px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;justify-content:center}
+    .hero-integrations span.cap{font-size:14px;font-weight:700;color:var(--faint);letter-spacing:.06em;text-transform:uppercase}
+    .chip{font-size:14.5px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 16px;box-shadow:var(--shadow-sm)}
+
+    /* ============ 2. БОЛИ (в Tilda: T123) ============ */
+    .pains{background:var(--bg-soft)}
+    .pain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+    .pain-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s}
+    .pain-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+    .pain-ico{width:46px;height:46px;border-radius:12px;background:#FEF2F2;color:#B91C1C;display:grid;place-items:center;margin-bottom:18px}
+    .pain-card h3{margin-bottom:10px}
+    .pain-card p{font-size:15.5px;color:var(--muted)}
+    .ba-wrap{margin-top:56px;display:grid;grid-template-columns:1fr 64px 1fr;align-items:stretch;gap:0}
+    .ba-col{border-radius:var(--radius);padding:34px 32px}
+    .ba-before{background:#fff;border:1px solid var(--line)}
+    .ba-after{background:var(--indigo);color:#E0E7FF;box-shadow:var(--shadow-lg)}
+    .ba-col h3{font-size:15px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px}
+    .ba-before h3{color:#B91C1C}
+    .ba-after h3{color:#C7D2FE}
+    .ba-col ul{list-style:none;display:grid;gap:14px}
+    .ba-col li{display:flex;gap:12px;font-size:16px}
+    .ba-before li{color:var(--muted)}
+    .ba-after li{color:#EEF2FF}
+    .ba-col li svg{flex:none;margin-top:3px}
+    .ba-arrow{display:grid;place-items:center;color:var(--indigo)}
+    .pains .cta-row{margin-top:48px;text-align:center}
+
+    /* ============ 3. РЕШЕНИЕ (в Tilda: T123) ============ */
+    .solve-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+    .solve-card{border:1px solid var(--line);border-radius:var(--radius);padding:30px;background:#fff;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:14px;transition:transform .2s,box-shadow .2s}
+    .solve-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+    .solve-from{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--faint);text-decoration:line-through;text-decoration-color:#FCA5A5}
+    .solve-card h3{display:flex;gap:12px;align-items:center}
+    .solve-card h3 .ok{width:30px;height:30px;flex:none;border-radius:9px;background:var(--indigo-soft);color:var(--indigo-deep);display:grid;place-items:center}
+    .solve-card p{color:var(--muted);font-size:16px}
+
+    /* ============ 4. ФУНКЦИИ (в Tilda: T754) ============ */
+    .features{background:var(--bg-soft)}
+    .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+    .feat-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:30px 28px;box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s,border-color .2s}
+    .feat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:#C7D2FE}
+    .feat-ico{width:50px;height:50px;border-radius:13px;background:var(--indigo-soft);color:var(--indigo-deep);display:grid;place-items:center;margin-bottom:20px}
+    .feat-card h3{margin-bottom:10px}
+    .feat-card p{font-size:15.5px;color:var(--muted)}
+    .feat-card .tag{display:inline-block;margin-top:16px;font-size:13px;font-weight:700;color:var(--indigo-deep);background:var(--indigo-soft);border-radius:999px;padding:4px 12px}
+    .shots{margin-top:56px;display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+    .shot{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
+    .shot svg{width:100%;height:auto;display:block}
+    .shot figcaption{padding:14px 18px;font-size:14.5px;font-weight:700;color:var(--ink);border-top:1px solid var(--line)}
+    .shot figcaption small{display:block;font-weight:500;color:var(--faint)}
+
+    /* ============ 5. ШАГИ ============ */
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;counter-reset:step}
+    .step{position:relative;padding-top:8px}
+    .step::before{counter-increment:step;content:counter(step);width:52px;height:52px;border-radius:16px;background:var(--indigo);color:#fff;font-weight:800;font-size:22px;display:grid;place-items:center;box-shadow:var(--shadow-md);margin-bottom:20px}
+    .step::after{content:"";position:absolute;top:34px;left:64px;right:-14px;height:2px;background:repeating-linear-gradient(90deg,#C7D2FE 0 8px,transparent 8px 16px)}
+    .step:last-child::after{display:none}
+    .step h3{margin-bottom:10px}
+    .step p{font-size:15.5px;color:var(--muted)}
+    .step .time{display:inline-block;margin-top:12px;font-size:13px;font-weight:700;color:var(--green);background:#ECFDF5;border-radius:999px;padding:4px 12px}
+    .how .cta-row{margin-top:56px;text-align:center}
+
+    /* ============ 6. ТАРИФЫ (в Tilda: T795) ============ */
+    .pricing{background:linear-gradient(180deg,#fff 0%,var(--indigo-soft) 100%)}
+    .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch}
+    .price-card{position:relative;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:36px 32px;display:flex;flex-direction:column;box-shadow:var(--shadow-sm);transition:transform .2s,box-shadow .2s}
+    .price-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md)}
+    .price-card.popular{border-color:var(--indigo);box-shadow:var(--shadow-lg);outline:4px solid rgba(79,70,229,.12)}
+    .pop-badge{position:absolute;top:-15px;left:50%;transform:translateX(-50%);background:var(--indigo);color:#fff;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:6px 18px;box-shadow:var(--shadow-md);white-space:nowrap}
+    .price-card h3{font-size:22px}
+    .price-card .for{font-size:14.5px;color:var(--faint);font-weight:600;margin:6px 0 22px}
+    .price{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+    .price .num{font-size:44px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+    .price .per{font-size:15px;color:var(--faint);font-weight:600}
+    .price-sub{font-size:13.5px;color:var(--faint);margin-bottom:24px;min-height:20px}
+    .price-card ul{list-style:none;display:grid;gap:12px;margin:0 0 30px}
+    .price-card li{display:flex;gap:10px;font-size:15.5px;color:var(--body)}
+    .price-card li svg{flex:none;margin-top:4px;color:var(--indigo)}
+    .price-card li.dim{color:var(--faint)}
+    .price-card li.dim svg{color:var(--faint)}
+    .price-card .btn{margin-top:auto}
+    .price-card .demo-link{display:block;text-align:center;margin-top:14px;font-size:14.5px;font-weight:700;color:var(--indigo-deep);text-decoration:none}
+    .price-card .demo-link:hover{text-decoration:underline}
+    .price-guarantee{margin-top:40px;display:flex;justify-content:center;gap:12px;align-items:center;font-size:15.5px;font-weight:600;color:var(--muted)}
+    .price-guarantee svg{color:var(--green);flex:none}
+
+    /* ============ 7. СОЦДОКАЗАТЕЛЬСТВА ============ */
+    .proof-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;margin-bottom:48px}
+    .rating-box{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 26px;box-shadow:var(--shadow-sm)}
+    .rating-box .big{font-size:40px;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+    .rating-box p{font-size:14.5px;color:var(--muted);font-weight:600}
+    .logos{display:flex;flex-wrap:wrap;gap:14px 36px;align-items:center;justify-content:center;padding:26px 0;border-block:1px solid var(--line);margin-bottom:48px}
+    .logos span{font-weight:800;font-size:17px;color:#9CA3AF;letter-spacing:-.01em;filter:grayscale(1);opacity:.9}
+    .logos span:nth-child(2){font-family:Georgia,serif;font-style:italic;font-weight:600}
+    .logos span:nth-child(3){letter-spacing:.22em;font-size:14px;text-transform:uppercase}
+    .logos span:nth-child(4){font-weight:900}
+    .logos span:nth-child(5){font-family:Georgia,serif;font-weight:700}
+    .logos span:nth-child(6){letter-spacing:.08em;font-size:15px;text-transform:uppercase;font-weight:700}
+    .rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+    .rev-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:16px;transition:transform .2s,box-shadow .2s}
+    .rev-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+    .rev-card .stars{color:#F59E0B}
+    .rev-card p{font-size:15.5px;color:var(--body)}
+    .rev-author{display:flex;align-items:center;gap:12px;margin-top:auto}
+    .rev-author svg{flex:none}
+    .rev-author b{display:block;color:var(--ink);font-size:15px}
+    .rev-author small{color:var(--faint);font-size:13.5px}
+
+    /* ============ 8. FAQ (в Tilda: T123/Accordion) ============ */
+    .faq{background:var(--bg-soft)}
+    .faq-list{max-width:820px;margin-inline:auto;display:grid;gap:14px}
+    details{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-sm);overflow:hidden}
+    details[open]{border-color:#C7D2FE}
+    summary{list-style:none;cursor:pointer;padding:22px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px;font-weight:700;color:var(--ink);font-size:17px}
+    summary::-webkit-details-marker{display:none}
+    summary .plus{flex:none;width:28px;height:28px;border-radius:8px;background:var(--indigo-soft);color:var(--indigo-deep);display:grid;place-items:center;transition:transform .25s}
+    details[open] summary .plus{transform:rotate(45deg)}
+    details .answer{padding:0 26px 24px;color:var(--muted);font-size:16px;max-width:720px}
+    .faq .cta-row{margin-top:40px;text-align:center;font-size:16px;color:var(--muted)}
+
+    /* ============ 9. ФИНАЛЬНЫЙ CTA + ФОРМА ============ */
+    .final{background:var(--indigo);color:#E0E7FF;position:relative;overflow:hidden}
+    .final::before{content:"";position:absolute;inset:0;background:
+      radial-gradient(700px 340px at 15% 0%, rgba(255,255,255,.14), transparent 60%),
+      radial-gradient(700px 340px at 90% 100%, rgba(255,255,255,.10), transparent 60%)}
+    .final .container{position:relative}
+    .final h2{color:#fff}
+    .final .lead{color:#C7D2FE;margin:18px auto 36px}
+    .final-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:999px;padding:7px 16px;font-size:13.5px;font-weight:700;margin-bottom:20px}
+    .final-cta{display:flex;flex-direction:column;align-items:center;gap:18px}
+    .final .btn-primary{background:#fff;color:var(--indigo-deep);box-shadow:0 12px 32px rgba(0,0,0,.22)}
+    .final .btn-primary:hover{background:#EEF2FF;transform:translateY(-2px)}
+    .final-guarantee{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:#C7D2FE}
+    .final-form{margin:52px auto 0;max-width:560px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:28px;backdrop-filter:blur(6px)}
+    .final-form h3{color:#fff;font-size:19px;margin-bottom:6px}
+    .final-form p{font-size:14.5px;color:#C7D2FE;margin-bottom:18px}
+    .form-row{display:flex;gap:12px}
+    .form-row input{flex:1;min-width:0;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.94);border-radius:14px;padding:15px 18px;font:inherit;font-size:16px;color:var(--ink)}
+    .form-row input:focus{outline:3px solid #A5B4FC;outline-offset:1px}
+    .form-row .btn{background:var(--ink);color:#fff}
+    .form-row .btn:hover{background:#000;transform:translateY(-2px)}
+    .form-consent{margin-top:12px;font-size:12.5px;color:#C7D2FE}
+    .form-consent a{color:#fff}
+    .form-success{display:none;text-align:center;color:#fff;font-weight:700;font-size:17px;padding:12px 0}
+
+    /* ============ 10. ПОДВАЛ ============ */
+    footer{background:#111327;color:#9CA3AF;padding:64px 0 32px}
+    .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
+    .foot-logo{color:#fff}
+    .foot-grid p{font-size:14.5px;margin-top:14px;max-width:280px}
+    .foot-grid h4{color:#fff;font-size:14px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+    .foot-grid ul{list-style:none;display:grid;gap:11px}
+    .foot-grid ul a{color:#9CA3AF;text-decoration:none;font-size:15px}
+    .foot-grid ul a:hover{color:#fff}
+    .socials{display:flex;gap:12px;margin-top:20px}
+    .socials a{width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,.08);display:grid;place-items:center;color:#E5E7EB;transition:background .15s,transform .15s}
+    .socials a:hover{background:var(--indigo);color:#fff;transform:translateY(-2px)}
+    .foot-bottom{border-top:1px solid rgba(255,255,255,.12);padding-top:26px;display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;font-size:13.5px}
+    .foot-bottom a{color:#9CA3AF;text-decoration:none}
+    .foot-bottom a:hover{color:#fff}
+
+    /* ============ АНИМАЦИИ ПОЯВЛЕНИЯ ============ */
+    .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+    .reveal.visible{opacity:1;transform:none}
+    @media (prefers-reduced-motion: reduce){
+      html{scroll-behavior:auto}
+      .reveal{opacity:1;transform:none;transition:none}
+      .float-card{animation:none}
+      *{transition-duration:.01ms !important}
+    }
+
+    /* ============ АДАПТИВ: 1024 / 768 / 375 ============ */
+    @media (max-width:1024px){
+      section{padding:76px 0}
+      .hero-grid{grid-template-columns:1fr;gap:48px}
+      .hero-visual{max-width:640px;margin-inline:auto}
+      .pain-grid{grid-template-columns:repeat(2,1fr)}
+      .feat-grid,.shots,.rev-grid{grid-template-columns:repeat(2,1fr)}
+      .steps{grid-template-columns:repeat(2,1fr);gap:36px}
+      .step::after{display:none}
+      .price-grid{grid-template-columns:1fr;max-width:520px;margin-inline:auto}
+      .price-card.popular{order:-1}
+      .foot-grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:768px){
+      body{font-size:16px}
+      section{padding:60px 0}
+      .nav-links,.nav-login{display:none}
+      .burger{display:block}
+      .nav-cta .btn{padding:11px 18px;font-size:14.5px}
+      .hero{padding:44px 0 64px}
+      .ba-wrap{grid-template-columns:1fr;gap:18px}
+      .ba-arrow{transform:rotate(90deg);height:40px}
+      .solve-grid{grid-template-columns:1fr}
+      .form-row{flex-direction:column}
+      .proof-top{justify-content:center}
+    }
+    @media (max-width:480px){
+      .container{width:calc(100% - 36px)}
+      .pain-grid,.feat-grid,.shots,.rev-grid,.steps{grid-template-columns:1fr}
+      .float-card{display:none}
+      .hero-cta .btn{width:100%}
+      .foot-grid{grid-template-columns:1fr}
+      .rating-box{width:100%;justify-content:center}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════ STICKY-НАВИГАЦИЯ ══════════ -->
+<header class="nav" id="nav">
+  <div class="container nav-inner">
+    <a class="logo" href="#top" aria-label="TaskFlow — на главную">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4F46E5"/><path d="M9 17l5 5 9-11" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      TaskFlow
+    </a>
+    <ul class="nav-links">
+      <li><a href="#solution">Возможности</a></li>
+      <li><a href="#features">Функции</a></li>
+      <li><a href="#how">Как работает</a></li>
+      <li><a href="#pricing">Тарифы</a></li>
+      <li><a href="#reviews">Отзывы</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="nav-login" href="#">Войти</a>
+      <a class="btn btn-primary btn-md" href="#cta">Попробовать бесплатно</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu container" id="mobileMenu">
+    <a href="#solution">Возможности</a>
+    <a href="#features">Функции</a>
+    <a href="#how">Как работает</a>
+    <a href="#pricing">Тарифы</a>
+    <a href="#reviews">Отзывы</a>
+    <a href="#faq">FAQ</a>
+    <a href="#">Войти</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ══════════ БЛОК 1. HERO (Zero Block в Tilda) ══════════ -->
+<section class="hero" data-block="HERO: оффер и мокап">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-social reveal">
+        <div class="avatars" aria-hidden="true">
+          <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#C7D2FE"/><text x="20" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#3730A3">МК</text></svg>
+          <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#FDE68A"/><text x="20" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#92400E">ДС</text></svg>
+          <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#A7F3D0"/><text x="20" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#065F46">АВ</text></svg>
+          <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="#FBCFE8"/><text x="20" y="26" text-anchor="middle" font-size="15" font-weight="700" fill="#9D174D">ПК</text></svg>
+        </div>
+        <p>Уже <strong>47 000+ пользователей</strong> планируют день с TaskFlow</p>
+      </div>
+      <h1 class="reveal">Приложение для планирования задач <span>без хаоса и выгорания</span></h1>
+      <p class="lead reveal">TaskFlow собирает задачи из заметок, мессенджеров и головы в один умный план дня. Каждое утро ты точно знаешь, что делать сначала — и что может подождать.</p>
+      <div class="hero-cta reveal">
+        <a class="btn btn-primary btn-lg" href="#cta">Попробовать бесплатно 14 дней</a>
+        <a class="btn btn-ghost btn-lg" href="#how">Как это работает</a>
+      </div>
+      <p class="hero-note reveal"><b>Без карты</b> · Настройка за 5 минут · Отмена в один клик</p>
+      <div class="hero-rating reveal">
+        <span class="stars" aria-label="Рейтинг 4.8 из 5">
+          <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+          <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+          <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+          <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+          <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+        </span>
+        4.8 / 5 — средняя оценка по 2 300 отзывам
+      </div>
+    </div>
+    <div class="hero-visual reveal">
+      <img src="assets/app-mockup.webp" width="1024" height="1024" fetchpriority="high" alt="Интерфейс TaskFlow: kanban-доска, календарь и список задач на ноутбуке и смартфоне">
+      <div class="float-card fc-1">
+        <span class="ico" style="background:#ECFDF5;color:#047857"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg></span>
+        <span>План дня готов<small>AI собрал за 12 секунд</small></span>
+      </div>
+      <div class="float-card fc-2">
+        <span class="ico" style="background:#EEF2FF;color:#4338CA"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="7.5"/><path d="M10 6v4l3 2" stroke-linecap="round"/></svg></span>
+        <span>Дедлайн через 3 дня<small>напомню за день и за час</small></span>
+      </div>
+    </div>
+  </div>
+  <div class="container hero-integrations reveal">
+    <span class="cap">Работает в связке с:</span>
+    <span class="chip">Google Calendar</span>
+    <span class="chip">Slack</span>
+    <span class="chip">Notion</span>
+    <span class="chip">Telegram</span>
+    <span class="chip">Gmail</span>
+  </div>
+</section>
+
+<!-- ══════════ БЛОК 2. БОЛИ ЦА (формула PAS) ══════════ -->
+<section class="pains" id="pain" data-block="Боли: знакомо?">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Знакомо?</span>
+      <h2>Дело не в лени. Дело в хаосе инструментов</h2>
+      <p class="lead">Задачи живут в пяти местах сразу, приоритеты — только в голове. Отсюда срывы дедлайнов, тревожное «я всё забыл» и вечера вместо отдыха.</p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-card reveal">
+        <div class="pain-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h16M4 12h10M4 19h7"/><path d="M17 14l4 4m0-4l-4 4"/></svg></div>
+        <h3>Задачи теряются</h3>
+        <p>Половина — в заметках, половина — в мессенджерах, ещё три — на стикерах. Что-то важное всплывает только тогда, когда уже поздно.</p>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+        <h3>«Я всё забыл и ничего не успел»</h3>
+        <p>День заканчивается, а главное так и не сдвинулось. Знакомое чувство вины вечером — прямой путь к выгоранию.</p>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="8" height="7" rx="2"/><rect x="13" y="13" width="8" height="7" rx="2"/><path d="M11 7.5h4M7.5 11v4"/></svg></div>
+        <h3>Инструменты вразнобой</h3>
+        <p>Календарь отдельно, задачи отдельно, переписки — в трёх мессенджерах. Планировщики при этом либо космолёт, либо блокнот.</p>
+      </div>
+      <div class="pain-card reveal">
+        <div class="pain-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><circle cx="17" cy="10" r="3"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M15 19c.4-2 1.4-3.4 3-3.9"/></svg></div>
+        <h3>В команде — «а кто это делает?»</h3>
+        <p>Задачи дублируются или не делаются вовсе: непонятно, кто за что отвечает и на каком этапе проект прямо сейчас.</p>
+      </div>
+    </div>
+
+    <!-- Визуализация «До / После» -->
+    <div class="ba-wrap reveal">
+      <div class="ba-col ba-before">
+        <h3>До TaskFlow</h3>
+        <ul>
+          <li><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#B91C1C" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>Утро начинается с панического перебора чатов и заметок</li>
+          <li><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#B91C1C" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>Важное и срочное перемешано, приоритеты угадываешь</li>
+          <li><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#B91C1C" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>Дедлайны приходят «внезапно», за ночь до срока</li>
+          <li><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#B91C1C" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>В команде задачи теряются между «созвонимся» и «я думал, это ты»</li>
+        </ul>
+      </div>
+      <div class="ba-arrow" aria-hidden="true">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-5-5m5 5l-5 5"/></svg>
+      </div>
+      <div class="ba-col ba-after">
+        <h3>После TaskFlow</h3>
+        <ul>
+          <li><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#A5B4FC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Открываешь одно окно — и видишь весь день по порядку</li>
+          <li><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#A5B4FC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>План собран по приоритетам и дедлайнам, а не по настроению</li>
+          <li><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#A5B4FC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>AI напомнит о дедлайне заранее и разобьёт задачу на шаги</li>
+          <li><svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#A5B4FC" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>У каждой задачи есть владелец, срок и статус — всем всё видно</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cta-row reveal">
+      <a class="btn btn-primary btn-lg" href="#cta">Навести порядок бесплатно</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ БЛОК 3. РЕШЕНИЕ: боль → ответ ══════════ -->
+<section id="solution" data-block="Решение: как TaskFlow закрывает боли">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Решение</span>
+      <h2>TaskFlow берёт хаос на себя</h2>
+      <p class="lead">Каждой боли — свой ответ. Не ещё один список дел, а система, которая думает вместе с тобой.</p>
+    </div>
+    <div class="solve-grid">
+      <div class="solve-card reveal">
+        <span class="solve-from">Задачи разбросаны по заметкам и чатам</span>
+        <h3><span class="ok"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg></span>Всё в одном окне</h3>
+        <p>Kanban-доски, списки, календарь и тайм-блокинг живут вместе. Задача, встреча и дедлайн видны на одном экране — переключаться не нужно.</p>
+      </div>
+      <div class="solve-card reveal">
+        <span class="solve-from">Приоритеты приходится держать в голове</span>
+        <h3><span class="ok"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg></span>Умный план дня</h3>
+        <p>Каждое утро TaskFlow сам выстраивает задачи по приоритетам и дедлайнам. Тебе остаётся делать — а не решать, за что хвататься.</p>
+      </div>
+      <div class="solve-card reveal">
+        <span class="solve-from">Дедлайны подкрадываются незаметно</span>
+        <h3><span class="ok"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg></span>AI-ассистент на страже</h3>
+        <p>Ассистент разобьёт большую задачу на понятные шаги и напомнит о сроке заранее — в нужный момент, а не когда уже поздно.</p>
+      </div>
+      <div class="solve-card reveal">
+        <span class="solve-from">Непонятно, кто за что отвечает</span>
+        <h3><span class="ok"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg></span>Прозрачная командная работа</h3>
+        <p>Общие проекты, назначение задач, комментарии и статусы. Каждый видит свою зону ответственности — и прогресс команды целиком.</p>
+      </div>
+    </div>
+    <div class="cta-row center reveal" style="margin-top:48px">
+      <a class="btn btn-primary btn-lg" href="#cta">Собрать свои задачи в одну систему</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ БЛОК 4. ФУНКЦИИ (сетка 6 карточек + скриншоты) ══════════ -->
+<section class="features" id="features" data-block="Функции: 6 карточек и интерфейс">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Возможности</span>
+      <h2>Всё нужное — и ничего лишнего</h2>
+      <p class="lead">Шесть причин, почему TaskFlow заменяет три-четыре других сервиса.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9L9.5 8z"/></svg></div>
+        <h3>Умное планирование дня</h3>
+        <p>План на день собирается сам — по приоритетам, дедлайнам и твоей загрузке. Утром просто открываешь и делаешь.</p>
+        <span class="tag">Экономит ~40 мин в день</span>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="5.5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5.5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="14" rx="1.5"/></svg></div>
+        <h3>Kanban, списки, календарь, тайм-блокинг</h3>
+        <p>Четыре режима просмотра в одном окне. Переключайся как удобно: доска для проектов, блоки — для глубокой работы.</p>
+        <span class="tag">4 режима в одном окне</span>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a8 8 0 0 1 14-3M20 16a8 8 0 0 1-14 3"/><path d="M18 2v3.5h-3.5M6 22v-3.5h3.5"/></svg></div>
+        <h3>Синхронизация в реальном времени</h3>
+        <p>Начал на ноутбуке, продолжил в телефоне по дороге, закрыл на планете… на планшете вечером. Всё обновляется мгновенно.</p>
+        <span class="tag">Web · iOS · Android · Desktop</span>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8.5" cy="8" r="3.5"/><circle cx="16.5" cy="9.5" r="3"/><path d="M2.5 19c.6-3.4 3-5.5 6-5.5s5.4 2.1 6 5.5M14.5 19c.4-2.2 1.6-3.7 3.5-4.2"/></svg></div>
+        <h3>Командная работа</h3>
+        <p>Общие проекты, назначение задач, комментарии и упоминания. Прогресс команды виден без созвонов и «а что там с…?»</p>
+        <span class="tag">Для команд 5–30 человек</span>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V7z"/><path d="M9.5 12l2 2 3.5-4"/></svg></div>
+        <h3>AI-ассистент</h3>
+        <p>«Запустить рассылку» превратится в 6 понятных шагов с черновиками сроков. И напомнит ровно тогда, когда это нужно.</p>
+        <span class="tag">Декомпозиция задач</span>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4M15 6h4a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-4M8 12h8"/></svg></div>
+        <h3>Интеграции с твоими инструментами</h3>
+        <p>Google Calendar, Slack, Notion, Telegram и Gmail. Задачи из писем и сообщений сами попадают в нужный проект.</p>
+        <span class="tag">5 интеграций из коробки</span>
+      </div>
+    </div>
+
+    <!-- «Скриншоты» интерфейса (inline SVG — мгновенная загрузка) -->
+    <div class="shots">
+      <figure class="shot reveal">
+        <svg viewBox="0 0 360 220" role="img" aria-label="Kanban-доска TaskFlow">
+          <rect width="360" height="220" fill="#F9FAFB"/>
+          <rect x="16" y="16" width="100" height="24" rx="6" fill="#EEF2FF"/><rect x="26" y="25" width="56" height="6" rx="3" fill="#4F46E5"/>
+          <g fill="#fff" stroke="#E5E7EB"><rect x="16" y="52" width="100" height="64" rx="8"/><rect x="16" y="124" width="100" height="52" rx="8"/><rect x="130" y="52" width="100" height="52" rx="8"/><rect x="130" y="112" width="100" height="72" rx="8"/><rect x="244" y="52" width="100" height="72" rx="8"/><rect x="244" y="132" width="100" height="44" rx="8"/></g>
+          <g fill="#C7D2FE"><rect x="26" y="62" width="18" height="8" rx="4"/><rect x="140" y="62" width="18" height="8" rx="4"/><rect x="254" y="62" width="18" height="8" rx="4"/></g>
+          <g fill="#E5E7EB"><rect x="26" y="78" width="76" height="5" rx="2.5"/><rect x="26" y="89" width="58" height="5" rx="2.5"/><rect x="140" y="78" width="76" height="5" rx="2.5"/><rect x="254" y="78" width="76" height="5" rx="2.5"/><rect x="254" y="89" width="50" height="5" rx="2.5"/></g>
+          <circle cx="98" cy="104" r="7" fill="#A7F3D0"/><circle cx="212" cy="96" r="7" fill="#FDE68A"/><circle cx="326" cy="104" r="7" fill="#FBCFE8"/>
+        </svg>
+        <figcaption>Kanban-доска<small>Прогресс проекта на одном экране</small></figcaption>
+      </figure>
+      <figure class="shot reveal">
+        <svg viewBox="0 0 360 220" role="img" aria-label="Умный план дня с тайм-блоками">
+          <rect width="360" height="220" fill="#F9FAFB"/>
+          <rect x="16" y="16" width="120" height="10" rx="5" fill="#111827" opacity=".82"/>
+          <g><rect x="16" y="44" width="328" height="34" rx="8" fill="#4F46E5"/><rect x="28" y="57" width="120" height="7" rx="3.5" fill="#fff" opacity=".9"/><rect x="300" y="55" width="32" height="10" rx="5" fill="#fff" opacity=".55"/></g>
+          <g><rect x="16" y="86" width="240" height="34" rx="8" fill="#C7D2FE"/><rect x="28" y="99" width="100" height="7" rx="3.5" fill="#3730A3"/></g>
+          <g><rect x="16" y="128" width="288" height="34" rx="8" fill="#EEF2FF" stroke="#C7D2FE"/><rect x="28" y="141" width="140" height="7" rx="3.5" fill="#4F46E5" opacity=".7"/></g>
+          <g><rect x="16" y="170" width="180" height="34" rx="8" fill="#fff" stroke="#E5E7EB"/><rect x="28" y="183" width="90" height="7" rx="3.5" fill="#9CA3AF"/></g>
+          <circle cx="330" cy="187" r="12" fill="#ECFDF5"/><path d="M325 187l4 4 7-8" stroke="#047857" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <figcaption>Умный план дня<small>Тайм-блоки по приоритетам и дедлайнам</small></figcaption>
+      </figure>
+      <figure class="shot reveal">
+        <svg viewBox="0 0 360 220" role="img" aria-label="Командный проект с комментариями">
+          <rect width="360" height="220" fill="#F9FAFB"/>
+          <g fill="#fff" stroke="#E5E7EB"><rect x="16" y="16" width="328" height="56" rx="10"/><rect x="16" y="84" width="328" height="56" rx="10"/><rect x="16" y="152" width="328" height="52" rx="10"/></g>
+          <circle cx="44" cy="44" r="13" fill="#C7D2FE"/><circle cx="44" cy="112" r="13" fill="#FDE68A"/><circle cx="44" cy="178" r="13" fill="#A7F3D0"/>
+          <g fill="#E5E7EB"><rect x="68" y="32" width="150" height="7" rx="3.5"/><rect x="68" y="48" width="100" height="6" rx="3"/><rect x="68" y="100" width="180" height="7" rx="3.5"/><rect x="68" y="116" width="120" height="6" rx="3"/><rect x="68" y="168" width="140" height="7" rx="3.5"/><rect x="68" y="184" width="90" height="6" rx="3"/></g>
+          <rect x="252" y="32" width="76" height="22" rx="11" fill="#EEF2FF"/><rect x="264" y="41" width="52" height="5" rx="2.5" fill="#4F46E5"/>
+          <rect x="252" y="100" width="76" height="22" rx="11" fill="#ECFDF5"/><rect x="264" y="109" width="52" height="5" rx="2.5" fill="#047857"/>
+          <rect x="252" y="166" width="76" height="22" rx="11" fill="#FEF3C7"/><rect x="264" y="175" width="52" height="5" rx="2.5" fill="#92400E"/>
+        </svg>
+        <figcaption>Пространство команды<small>Задачи, владельцы и статусы</small></figcaption>
+      </figure>
+    </div>
+    <div class="cta-row center reveal" style="margin-top:48px">
+      <a class="btn btn-primary btn-lg" href="#cta">Попробовать все функции бесплатно</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ БЛОК 5. КАК ЭТО РАБОТАЕТ: 4 шага ══════════ -->
+<section class="how" id="how" data-block="Как это работает: 4 шага">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Как это работает</span>
+      <h2>От хаоса до плана — четыре шага</h2>
+      <p class="lead">Никаких внедрений на месяц. Первый рабочий план дня появится уже сегодня.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <h3>Регистрация</h3>
+        <p>Почта или вход через Google — и ты внутри. Без карты и долгих анкет.</p>
+        <span class="time">1 минута</span>
+      </div>
+      <div class="step reveal">
+        <h3>Настройка под себя</h3>
+        <p>Подключи календарь и мессенджеры, импортируй задачи из Notion или Trello одним кликом.</p>
+        <span class="time">5 минут</span>
+      </div>
+      <div class="step reveal">
+        <h3>Планирование</h3>
+        <p>Каждое утро TaskFlow собирает план дня по приоритетам и дедлайнам. AI разобьёт крупные задачи на шаги.</p>
+        <span class="time">Каждое утро</span>
+      </div>
+      <div class="step reveal">
+        <h3>Результат</h3>
+        <p>Дедлайны закрыты, вечер свободен, а чувство «я всё забыл» осталось в прошлом.</p>
+        <span class="time">Уже через неделю</span>
+      </div>
+    </div>
+    <div class="cta-row reveal">
+      <a class="btn btn-primary btn-lg" href="#cta">Сделать первый шаг — бесплатно</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ БЛОК 6. ТАРИФЫ ══════════ -->
+<section class="pricing" id="pricing" data-block="Тарифы: Free / Pro / Team">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Тарифы</span>
+      <h2>Начни бесплатно — расти, когда готов</h2>
+      <p class="lead">14 дней Pro-тарифа бесплатно, без карты. Потом можно остаться на Free навсегда — без скрытых сюрпризов.</p>
+    </div>
+    <div class="price-grid">
+      <!-- FREE -->
+      <div class="price-card reveal">
+        <h3>Free</h3>
+        <p class="for">Чтобы разобраться и навести порядок в личных задачах</p>
+        <div class="price"><span class="num">0 ₽</span><span class="per">навсегда</span></div>
+        <p class="price-sub">Без карты и пробных сюрпризов</p>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Безлимит задач и 3 проекта</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Списки, kanban и календарь</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Веб и мобильное приложение</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Базовые напоминания</li>
+          <li class="dim"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 10h10"/></svg>AI-ассистент и тайм-блокинг</li>
+        </ul>
+        <a class="btn btn-ghost btn-md btn-block" href="#cta">Начать бесплатно</a>
+      </div>
+      <!-- PRO (популярный) -->
+      <div class="price-card popular reveal">
+        <span class="pop-badge">Выбор 78% пользователей</span>
+        <h3>Pro</h3>
+        <p class="for">Фрилансерам и самозанятым с 3+ проектами одновременно</p>
+        <div class="price"><span class="num">499 ₽</span><span class="per">/ месяц</span></div>
+        <p class="price-sub">Первые 14 дней — бесплатно, без карты</p>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Всё из Free, без лимитов проектов</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Умный план дня и тайм-блокинг</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>AI-ассистент: декомпозиция и напоминания</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Синхронизация на всех устройствах</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Интеграции: Google Calendar, Slack, Notion, Telegram, Gmail</li>
+        </ul>
+        <a class="btn btn-primary btn-md btn-block" href="#cta">Попробовать 14 дней бесплатно</a>
+        <a class="demo-link" href="#faq">Что входит в пробный период?</a>
+      </div>
+      <!-- TEAM -->
+      <div class="price-card reveal">
+        <h3>Team</h3>
+        <p class="for">Командам и стартапам от 5 до 30 человек</p>
+        <div class="price"><span class="num">от 399 ₽</span><span class="per">/ чел / мес</span></div>
+        <p class="price-sub">Чем больше команда — тем ниже цена</p>
+        <ul>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Всё из Pro для каждого участника</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Общие проекты, роли и права доступа</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Назначение задач и нагрузка команды</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Комментарии, упоминания, статусы</li>
+          <li><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>Отчёты по дедлайнам и приоритетная поддержка</li>
+        </ul>
+        <a class="btn btn-ghost btn-md btn-block" href="#cta">Запросить демо-звонок</a>
+        <a class="demo-link" href="mailto:team@taskflow.ru">Или написать: team@taskflow.ru</a>
+      </div>
+    </div>
+    <p class="price-guarantee reveal">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V7z"/><path d="M9.5 12l2 2 3.5-4"/></svg>
+      Гарантия 30 дней: не понравится — вернём деньги без вопросов и анкет
+    </p>
+  </div>
+</section>
+
+<!-- ══════════ БЛОК 7. СОЦИАЛЬНЫЕ ДОКАЗАТЕЛЬСТВА ══════════ -->
+<section id="reviews" data-block="Отзывы, рейтинг и логотипы клиентов">
+  <div class="container">
+    <div class="proof-top reveal">
+      <div class="section-head" style="margin-bottom:0">
+        <span class="eyebrow">Отзывы</span>
+        <h2>Нам доверяют те, кто живёт в дедлайнах</h2>
+      </div>
+      <div class="rating-box">
+        <span class="big">4.8</span>
+        <div>
+          <span class="stars" aria-label="4.8 из 5">
+            <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+            <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+            <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+            <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+            <svg width="18" height="18" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg>
+          </span>
+          <p>на основе 2 300 отзывов<br>в App Store, Google Play и на сайте</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="logos reveal" aria-label="Компании-клиенты">
+      <span>Nordwind Studio</span>
+      <span>Кофе&amp;Код</span>
+      <span>DIGITAL ТАЙГА</span>
+      <span>СтартапЛаб</span>
+      <span>МедиаПоток</span>
+      <span>FINANCE.PRO</span>
+    </div>
+
+    <div class="rev-grid">
+      <div class="rev-card reveal">
+        <span class="stars" aria-label="5 из 5"><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg></span>
+        <p>«Раньше задачи жили у меня в трёх мессенджерах и блокноте. Теперь утром открываю TaskFlow и уже вижу план дня. Сдала проект на две недели раньше срока — впервые за три года фриланса».</p>
+        <div class="rev-author">
+          <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="22" fill="#C7D2FE"/><text x="22" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#3730A3">МК</text></svg>
+          <div><b>Марина Ковалёва</b><small>Фриланс-дизайнер, Санкт-Петербург</small></div>
+        </div>
+      </div>
+      <div class="rev-card reveal">
+        <span class="stars" aria-label="5 из 5"><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg></span>
+        <p>«Перевёл команду из 12 человек за один день. Главный эффект — исчезли созвоны „а кто это делает?“. По доске видно всё: кто, что и когда сдаёт. Процессы ускорились примерно на треть».</p>
+        <div class="rev-author">
+          <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="22" fill="#FDE68A"/><text x="22" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#92400E">ДС</text></svg>
+          <div><b>Дмитрий Соколов</b><small>Основатель стартапа, команда 12 человек</small></div>
+        </div>
+      </div>
+      <div class="rev-card reveal">
+        <span class="stars" aria-label="5 из 5"><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg></span>
+        <p>«Веду пять проектов одновременно, и TaskFlow — единственный инструмент, который это выдерживает. AI-декомпозиция — просто магия: „сделать запуск“ превращается в понятные шаги за секунды».</p>
+        <div class="rev-author">
+          <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="22" fill="#A7F3D0"/><text x="22" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#065F46">АВ</text></svg>
+          <div><b>Анна Вершинина</b><small>Руководитель проектов, digital-агентство</small></div>
+        </div>
+      </div>
+      <div class="rev-card reveal">
+        <span class="stars" aria-label="5 из 5"><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg></span>
+        <p>«У меня СДВГ, и обычные планировщики для меня — либо слишком сложно, либо слишком скучно. Тут всё просто: открыл, увидел три главные задачи на день, сделал. Тревожность упала заметно».</p>
+        <div class="rev-author">
+          <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="22" fill="#FBCFE8"/><text x="22" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#9D174D">ИГ</text></svg>
+          <div><b>Илья Громов</b><small>Маркетолог, Москва</small></div>
+        </div>
+      </div>
+      <div class="rev-card reveal">
+        <span class="stars" aria-label="4 из 5"><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#E5E7EB" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg></span>
+        <p>«Сессия, подработка, стажировка и диплом одновременно. Тайм-блокинг спас: учёба и жизнь перестали конфликтовать. Ставлю 4 звезды только потому, что хочу ещё виджет на главный экран».</p>
+        <div class="rev-author">
+          <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="22" fill="#BFDBFE"/><text x="22" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#1E40AF">ОМ</text></svg>
+          <div><b>Ольга Мартынова</b><small>Аспирантка, МГУ</small></div>
+        </div>
+      </div>
+      <div class="rev-card reveal">
+        <span class="stars" aria-label="5 из 5"><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg><svg width="16" height="16" fill="#F59E0B" viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L10 14.9l-5.3 2.7 1-5.8L1.5 7.7l5.9-.9z"/></svg></span>
+        <p>«Скептически отношусь к „ещё одному таск-трекеру“. Но синхронизация между маком, айфоном и вебкой мгновенная, а интеграция с Gmail сама тянет задачи из писем. Остался на Pro после пробника без раздумий».</p>
+        <div class="rev-author">
+          <svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="22" fill="#DDD6FE"/><text x="22" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#5B21B6">ПК</text></svg>
+          <div><b>Павел Ким</b><small>Backend-разработчик, Казань</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ БЛОК 8. FAQ ══════════ -->
+<section class="faq" id="faq" data-block="FAQ: 8 частых вопросов">
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2>Частые вопросы</h2>
+      <p class="lead">Коротко о том, что обычно спрашивают перед стартом.</p>
+    </div>
+    <div class="faq-list reveal">
+      <details>
+        <summary>Мои данные в безопасности?<span class="plus"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+        <div class="answer">Да. Все данные передаются по шифрованному каналу (TLS 1.3) и хранятся в зашифрованном виде на серверах в России, в соответствии с 152-ФЗ. Доступ к задачам есть только у тебя и тех, кому ты сам открыл проект. Мы не продаём данные и не показываем рекламу.</div>
+      </details>
+      <details>
+        <summary>Работает ли TaskFlow на всех моих устройствах?<span class="plus"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+        <div class="answer">Да: веб-версия в браузере, приложения для iOS и Android, десктоп-клиенты для Windows и macOS. Изменения синхронизируются в реальном времени — начал задачу на ноутбуке, продолжил в телефоне по дороге.</div>
+      </details>
+      <details>
+        <summary>Какие интеграции есть и сложно ли их подключать?<span class="plus"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+        <div class="answer">Из коробки: Google Calendar, Slack, Notion, Telegram и Gmail. Подключение — пара кликов черезOAuth-авторизацию, без настроек и кода. Встречи из календаря встают в план дня автоматически, а задачи из писем и сообщений попадают в нужный проект.</div>
+      </details>
+      <details>
+        <summary>Что будет после окончания 14 дней пробного периода?<span class="plus"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+        <div class="answer">Ничего страшного: аккаунт автоматически перейдёт на бесплатный тариф Free, все задачи и проекты останутся на месте. Pro-функции просто станут недоступны до апгрейда. Никаких автосписаний — мы не просим карту при регистрации.</div>
+      </details>
+      <details>
+        <summary>Можно ли вернуть деньги за платный тариф?<span class="plus"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+        <div class="answer">Да, в течение 30 дней после оплаты — без вопросов и анкет. Достаточно написать на support@taskflow.ru, возврат приходит тем же способом оплаты в течение 3–5 рабочих дней.</div>
+      </details>
+      <details>
+        <summary>Подойдёт ли TaskFlow моей команде?<span class="plus"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+        <div class="answer">Да, тариф Team рассчитан на команды от 5 до 30 человек: общие проекты, роли и права доступа, назначение задач, комментарии и отчёты по дедлайнам. Для знакомства можно заказать бесплатный 30-минутный демо-звонок — покажем на примере ваших процессов.</div>
+      </details>
+      <details>
+        <summary>Могу ли импортировать задачи из другого сервиса?<span class="plus"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+        <div class="answer">Да: импорт из Trello, Asana, Notion и CSV-файлов в один клик, с сохранением проектов, меток и сроков. Обычно переезд занимает 5–10 минут вместо «недели страданий».</div>
+      </details>
+      <details>
+        <summary>У меня всё вылетает из головы. Мне поможет?<span class="plus"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 1v12M1 7h12"/></svg></span></summary>
+        <div class="answer">Именно для этого TaskFlow и создан. Быстрый ввод задачи в одно касание, умные напоминания и план из трёх главных дел на день снижают нагрузку на память и внимание. Многие пользователи с СДВГ называют его «внешним исполнительным директором для головы».</div>
+      </details>
+    </div>
+    <p class="cta-row reveal">Не нашёл ответ? <a class="link-arrow" href="mailto:support@taskflow.ru">Напиши нам — ответим за пару часов <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-5-5m5 5l-5 5"/></svg></a></p>
+  </div>
+</section>
+
+<!-- ══════════ БЛОК 9. ФИНАЛЬНЫЙ CTA + ФОРМА ЗАХВАТА ══════════ -->
+<section class="final center" id="cta" data-block="Финальный CTA и форма захвата">
+  <div class="container">
+    <span class="final-badge reveal">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      До 31 октября: +7 дней Pro в подарок к пробному периоду
+    </span>
+    <h2 class="reveal">Начни планировать с умом уже сегодня</h2>
+    <p class="lead reveal">14 дней Pro бесплатно, без карты. Настройка — 5 минут. Если не подойдёт — вернём деньги в течение 30 дней, без вопросов.</p>
+    <div class="final-cta reveal">
+      <a class="btn btn-primary btn-lg" href="https://taskflow.ru/signup">Попробовать бесплатно 14 дней</a>
+      <span class="final-guarantee">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 4v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V7z"/><path d="M9.5 12l2 2 3.5-4"/></svg>
+        Гарантия возврата 30 дней · Отмена в один клик
+      </span>
+    </div>
+    <!-- Форма захвата: в Tilda заменить на Tilda Forms (цель: lead_form_submit) -->
+    <form class="final-form reveal" id="leadForm" novalidate>
+      <h3>Сомневаешься, с чего начать?</h3>
+      <p>Оставь почту — пришлём ссылку на аккаунт и чек-лист «Порядок в задачах за 15 минут».</p>
+      <div class="form-row">
+        <input type="email" name="email" id="leadEmail" placeholder="твоя@почта.ру" required aria-label="Электронная почта">
+        <button class="btn btn-md" type="submit">Получить чек-лист</button>
+      </div>
+      <p class="form-consent">Нажимая кнопку, ты соглашаешься с <a href="#">политикой конфиденциальности</a>. Без спама — только польза, отписка в один клик.</p>
+      <p class="form-success" id="formSuccess">Готово! Письмо с чек-листом уже летит к тебе ✈️</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════ БЛОК 10. ПОДВАЛ ══════════ -->
+<footer data-block="Подвал: навигация, контакты, документы">
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a class="logo foot-logo" href="#top">
+          <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#4F46E5"/><path d="M9 17l5 5 9-11" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          TaskFlow
+        </a>
+        <p>Умное приложение для планирования задач: план дня, kanban, календарь и AI-ассистент в одном окне.</p>
+        <div class="socials">
+          <a href="#" aria-label="Telegram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6c.3-1.5-.6-2.2-1.6-1.8L2.7 9.5c-1.5.6-1.5 1.4-.3 1.8l4.5 1.4 1.7 5.3c.2.6.4.8 1 .8.5 0 .8-.2 1.1-.5l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.2-14.2z"/></svg></a>
+          <a href="#" aria-label="ВКонтакте"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.8 17.5c-5.5 0-8.9-3.9-9-10.3h2.8c.1 4.7 2.2 6.7 3.8 7.1V7.2h2.7v4c1.6-.2 3.2-2 3.8-4h2.6c-.4 2.4-2.1 4.2-3.3 4.9 1.2.6 3.2 2.2 3.9 5.4h-2.9c-.6-1.9-2.1-3.4-4.1-3.6v3.6h-.4z"/></svg></a>
+          <a href="#" aria-label="YouTube"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.8-.5-5.6c-.3-1-1.1-1.8-2.1-2C18.6 4 12 4 12 4s-6.6 0-8.4.4c-1 .3-1.8 1-2.1 2C1 8.2 1 12 1 12s0 3.8.5 5.6c.3 1 1.1 1.8 2.1 2 1.8.4 8.4.4 8.4.4s6.6 0 8.4-.4c1-.3 1.8-1 2.1-2 .5-1.8.5-5.6.5-5.6zM9.8 15.5v-7l6 3.5-6 3.5z"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4>Продукт</h4>
+        <ul>
+          <li><a href="#features">Возможности</a></li>
+          <li><a href="#pricing">Тарифы</a></li>
+          <li><a href="#how">Как работает</a></li>
+          <li><a href="#">Скачать приложение</a></li>
+          <li><a href="#">Что нового</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Компания</h4>
+        <ul>
+          <li><a href="#">О нас</a></li>
+          <li><a href="#reviews">Отзывы</a></li>
+          <li><a href="#">Блог о продуктивности</a></li>
+          <li><a href="#">Партнёрам</a></li>
+          <li><a href="#">Вакансии</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Поддержка</h4>
+        <ul>
+          <li><a href="mailto:support@taskflow.ru">support@taskflow.ru</a></li>
+          <li><a href="tel:+74951234567">+7 495 123-45-67</a></li>
+          <li><a href="#faq">Центр помощи</a></li>
+          <li><a href="#">Заказать демо Team</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 TaskFlow. Все права защищены.</span>
+      <span style="display:flex;gap:24px;flex-wrap:wrap">
+        <a href="#">Политика конфиденциальности</a>
+        <a href="#">Пользовательская оферта</a>
+        <a href="#">Реквизиты</a>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Sticky-навигация: тень при скролле
+  const nav = document.getElementById('nav');
+  addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 8), {passive:true});
+
+  // Мобильное меню
+  const burger = document.getElementById('burger'), menu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', () => {
+    const open = menu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open);
+  });
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
+
+  // Плавное появление блоков (ненавязчиво, с уважением к reduced-motion)
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  }), {threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Форма захвата (имитация отправки; в Tilda — Tilda Forms + цель lead_form_submit)
+  const form = document.getElementById('leadForm');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const email = document.getElementById('leadEmail');
+    if (!email.checkValidity()) { email.reportValidity(); return; }
+    form.querySelector('.form-row').style.display = 'none';
+    form.querySelector('p:not(.form-consent):not(.form-success)').style.display = 'none';
+    form.querySelector('.form-consent').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
+    // reachGoal('lead_form_submit');
+  });
+</script>
+</body>
+</html>
